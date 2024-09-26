@@ -1,6 +1,5 @@
 import express, { Application } from "express";
-import authRouter from "./routes/auth.js";
-import bookRouter from "./routes/beeperRouter.js"
+import beeperrouter from "./routes/beeperRouter.js"
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -10,7 +9,7 @@ const app: Application = express();
 
 app.use(express.json());
 
-app.use("/api/beepers", authRouter); 
+app.use("/api/beepers", beeperrouter); 
 
 
 app.listen(PORT, () => {

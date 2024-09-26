@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { v4 as uuidv4 } from "uuid";
 import { readFromJsonFile, writeBeeperToJsonFile } from "../DAL/jsonBeeper.js";
 import { Status } from '../models/status.js';
+import { coordinates } from '../models/locations.js';
 export const create = (beeperName) => __awaiter(void 0, void 0, void 0, function* () {
     const newBeeper = {
         id: uuidv4(),
@@ -47,6 +48,10 @@ export const updateStatus = (id, lat, lon) => __awaiter(void 0, void 0, void 0, 
     }
     if (beeperFind.status === Status.deployed) {
         if (lat && lon) {
+            const locationExists = coordinates.some((coord) => coord.lat === lat && coord.lon === lon);
+            if (!locationExists) {
+                throw new Error("Invalid coordinates. Location does not exist in the list.");
+            }
             beeperFind.Latitude = lat;
             beeperFind.Longitude = lon;
         }

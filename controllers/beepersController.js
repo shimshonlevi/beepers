@@ -87,7 +87,7 @@ export const updateStatusBeeper = (req, res) => __awaiter(void 0, void 0, void 0
 });
 export const deleteBeeperById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const beeperId = req.params.beeperId;
+        const beeperId = req.params.id;
         if (!beeperId) {
             res.status(400).json({ error: "enter beeper id" });
             return;

@@ -54,6 +54,12 @@ export const updateStatus = async (id: string, lat?: number, lon?: number): Prom
  
   if (beeperFind.status === Status.deployed) {
     if (lat && lon ) {
+      const locationExists = coordinates.some((coord) => coord.lat === lat && coord.lon === lon);
+      
+      if (!locationExists) {
+        throw new Error("Invalid coordinates. Location does not exist in the list.");
+      }
+
       beeperFind.Latitude = lat;
       beeperFind.Longitude = lon;
     }

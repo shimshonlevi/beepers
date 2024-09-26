@@ -85,7 +85,7 @@ export const updateStatusBeeper = async (req: Request, res: Response): Promise<v
 
 export const deleteBeeperById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const beeperId: string = req.params.beeperId;
+    const beeperId: string = req.params.id;
  if (!beeperId) {
       res.status(400).json({ error: "enter beeper id" });
       return;
