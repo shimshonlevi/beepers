@@ -86,7 +86,7 @@ export const deleteBeeper = async (id: string): Promise<void> => {
   await writeBeeperToJsonFile(newBeepersArr);
 };
 
-export const getStatus = async (status:Status): Promise<Beeper[] | undefined> => {
+export const getStatus = async (status:Status|string): Promise<Beeper[] | undefined> => {
   const beepers: Beeper[] = await readFromJsonFile();
   const newBeepersArr:Beeper[] =beepers.filter((b) => b.status === status);
   if (!newBeepersArr) {

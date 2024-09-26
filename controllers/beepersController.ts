@@ -64,7 +64,7 @@ export const getBeeperById = async (req: Request, res: Response): Promise<void> 
 
 export const updateStatusBeeper = async (req: Request, res: Response): Promise<void> => {
   try {
-    const beeperId: string = req.body.beeperId;
+    const beeperId: string = req.params.beeperId;
     const lat: number | undefined = req.body.lat;
     const lon: number | undefined = req.body.lon;
     if (!beeperId) {
@@ -108,7 +108,7 @@ export const deleteBeeperById = async (req: Request, res: Response): Promise<voi
 
 export const getBeeperByStatus = async (req: Request, res: Response): Promise<void> => {
   try {
-    const status: Status = req.body.status;
+    const status: Status |string = req.params.status;
  if (!status) {
       res.status(400).json({ error: "enter status" });
       return;
