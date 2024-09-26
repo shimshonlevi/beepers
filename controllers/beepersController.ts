@@ -65,23 +65,22 @@ export const getBeeperById = async (req: Request, res: Response): Promise<void> 
 export const updateStatusBeeper = async (req: Request, res: Response): Promise<void> => {
   try {
     const beeperId: string = req.body.beeperId;
-
- if (!beeperId) {
-      res.status(400).json({ error: "enter beeper id" });
+    const lat: number | undefined = req.body.lat;
+    const lon: number | undefined = req.body.lon;
+    if (!beeperId) {
+      res.status(400).json({ error: "Please provide a valid beeper ID." });
       return;
     }
-
-    const beeperUpdated = await updateStatus(beeperId);
-    res.status(200).json({ beeperUpdated });
+    const beeperUpdated = await updateStatus(beeperId, lat, lon);
+    res.status(200).json({ message: beeperUpdated });
   } catch (error: any) {
     if (error.message === "Invalid beeper ID.") {
       res.status(409).json({ error: error.message });
     } else {
-      res.status(500).json({ error: "שגיאת שרת פנימית." });
+      res.status(500).json({ error: "Internal server error." });
     }
   }
 };
-
 
 
 export const deleteBeeperById = async (req: Request, res: Response): Promise<void> => {
