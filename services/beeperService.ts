@@ -53,7 +53,7 @@ export const updateStatus = async (id: string, lat?: number, lon?: number): Prom
   }
  
   if (beeperFind.status === Status.deployed) {
-    if (lat && lon) {
+    if (lat && lon ) {
       beeperFind.Latitude = lat;
       beeperFind.Longitude = lon;
     }

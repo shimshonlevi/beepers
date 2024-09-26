@@ -10,98 +10,93 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { create, deleteBeeper, getAll, getBeeper, getStatus, updateStatus } from "../services/beeperService.js";
 export const createBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const bookName = req.body.bookName;
-        const userId = req.body.userId;
-        if (!bookName || !userId) {
-            res.status(400).json({ error: "חסר שם ספר או מזהה משתמש." });
+        const beeperName = req.body.beeperName;
+        if (!beeperName) {
+            res.status(400).json({ error: "Enter A Name." });
             return;
         }
-        const bookId = yield create(bookName, userId);
-        res.status(201).json({ userId: userId, bookId: bookId });
+        const beeperId = yield create(beeperName);
+        res.status(201).json({ beeperId: beeperId });
     }
     catch (error) {
         if (error.message === "Username already exists.") {
             res.status(409).json({ error: error.message });
         }
         else {
-            console.error("שגיאה בהוספת הספר:", error);
             res.status(500).json({ error: "שגיאת שרת פנימית." });
         }
     }
 });
 export const getAllBeepers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const bookId = req.params.bookId;
-        const userId = req.body.userId;
-        if (!bookId || !userId) {
-            res.status(400).json({ error: "חסר מזהה ספר או מזהה משתמש." });
+        const allBeepers = yield getAll();
+        if (!allBeepers) {
+            res.status(400).json({ error: "not beepers" });
             return;
         }
-        yield getAll(bookId, userId);
-        res.status(200).json({ message: `הספר עם מזהה ${bookId} נמחק.` });
+        res.status(200).json(allBeepers);
     }
     catch (error) {
-        console.error("שגיאה במחיקת הספר:", error);
-        res.status(500).json({ error: "שגיאת שרת." });
+        if (error.message === "Invalid beeper ID.") {
+            res.status(401).json({ error: error.message });
+        }
+        else {
+            res.status(500).json({ error: "שגיאת שרת פנימית." });
+        }
     }
 });
 export const getBeeperById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = req.params.userId;
-        if (!userId) {
-            res.status(400).json({ error: "נדרש מזהה משתמש." });
-            console.log("User found:", userId);
+        const beeperId = req.params.beeperId;
+        if (!beeperId) {
+            res.status(400).json({ error: "enter beeper id" });
             return;
         }
-        const books = yield getBeeper(userId);
-        res.status(200).json(books);
+        const beeper = yield getBeeper(beeperId);
+        res.status(200).json(beeper);
     }
     catch (error) {
-        if (error.message === "Invalid username or password.") {
+        if (error.message === "Invalid beeper ID.") {
             res.status(401).json({ error: error.message });
         }
         else {
-            console.error("שגיאה בשליפת הספרים:", error);
             res.status(500).json({ error: "שגיאת שרת פנימית." });
         }
     }
 });
 export const updateStatusBeeper = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = req.body.userId;
-        const updateData = req.body.updateData;
-        const bookId = req.body.bookId;
-        if (!userId || !updateData || !bookId) {
-            res.status(400).json({ error: "נדרש מזהה משתמש, מזהה ספר ונתוני עדכון." });
+        const beeperId = req.params.beeperId;
+        const lat = req.body.lat;
+        const lon = req.body.lon;
+        if (!beeperId) {
+            res.status(400).json({ error: "Please provide a valid beeper ID." });
             return;
         }
-        const book = yield updateStatus(userId, updateData, bookId);
-        res.status(200).json({ book });
+        const beeperUpdated = yield updateStatus(beeperId, lat, lon);
+        res.status(200).json({ message: beeperUpdated });
     }
     catch (error) {
-        if (error.message === "Username already exists.") {
+        if (error.message === "Invalid beeper ID.") {
             res.status(409).json({ error: error.message });
         }
         else {
-            console.error("שגיאה בעריכת הספר:", error);
-            res.status(500).json({ error: "שגיאת שרת פנימית." });
+            res.status(500).json({ error: "Internal server error." });
         }
     }
 });
 export const deleteBeeperById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = req.body.userId;
-        const updateData = req.body.updateData;
-        const bookId = req.body.bookId;
-        if (!userId || !updateData || !bookId) {
-            res.status(400).json({ error: "נדרש מזהה משתמש, מזהה ספר ונתוני עדכון." });
+        const beeperId = req.params.beeperId;
+        if (!beeperId) {
+            res.status(400).json({ error: "enter beeper id" });
             return;
         }
-        const book = yield deleteBeeper(userId, updateData, bookId);
-        res.status(200).json({ book });
+        yield deleteBeeper(beeperId);
+        res.status(200).json({ messag: `the beeper with it ${beeperId} is deleted` });
     }
     catch (error) {
-        if (error.message === "Username already exists.") {
+        if (error.message === "Invalid beeper ID.") {
             res.status(409).json({ error: error.message });
         }
         else {
@@ -112,22 +107,20 @@ export const deleteBeeperById = (req, res) => __awaiter(void 0, void 0, void 0, 
 });
 export const getBeeperByStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = req.body.userId;
-        const updateData = req.body.updateData;
-        const bookId = req.body.bookId;
-        if (!userId || !updateData || !bookId) {
-            res.status(400).json({ error: "נדרש מזהה משתמש, מזהה ספר ונתוני עדכון." });
+        const status = req.params.status;
+        if (!status) {
+            res.status(400).json({ error: "enter status" });
             return;
         }
-        const book = yield getStatus(userId, updateData, bookId);
-        res.status(200).json({ book });
+        const beepers = yield getStatus(status);
+        res.status(200).json({ beepers });
     }
     catch (error) {
-        if (error.message === "Username already exists.") {
+        if (error.message === "Status not found.") {
             res.status(409).json({ error: error.message });
         }
         else {
-            console.error("שגיאה בעריכת הספר:", error);
+            console.error(error);
             res.status(500).json({ error: "שגיאת שרת פנימית." });
         }
     }

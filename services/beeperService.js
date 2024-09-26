@@ -9,85 +9,73 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { v4 as uuidv4 } from "uuid";
 import { readFromJsonFile, writeBeeperToJsonFile } from "../DAL/jsonBeeper.js";
-export const create = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield readFromJsonFile();
-    const user = users.find((u) => u.id === userId);
-    if (!user) {
-        throw new Error('User not found.');
-    }
-    return user.books;
-});
-export const getAll = (bookName, userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield readFromJsonFile();
-    const userFind = users.find((u) => u.id === userId);
-    if (!userFind) {
-        throw new Error("Invalid username or password.");
-    }
-    const books = userFind.books;
-    const bookId = uuidv4();
-    const newBook = {
-        id: bookId,
-        title: bookName,
-        author: "API"
+import { Status } from '../models/status.js';
+export const create = (beeperName) => __awaiter(void 0, void 0, void 0, function* () {
+    const newBeeper = {
+        id: uuidv4(),
+        name: beeperName,
+        status: Status.manufactured,
+        created_at: new Date(),
     };
-    books.push(newBook);
-    yield writeBeeperToJsonFile(userFind);
-    return bookId;
+    const beepers = yield readFromJsonFile();
+    beepers.push(newBeeper);
+    yield writeBeeperToJsonFile(beepers);
+    return newBeeper;
 });
-export const getBeeper = (bookName, userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield readFromJsonFile();
-    const userFind = users.find((u) => u.id === userId);
-    if (!userFind) {
-        throw new Error("Invalid username or password.");
-    }
-    const books = userFind.books;
-    const bookId = uuidv4();
-    const newBook = {
-        id: bookId,
-        title: bookName,
-        author: "API"
-    };
-    books.push(newBook);
-    yield writeBeeperToJsonFile(userFind);
-    return bookId;
+export const getAll = () => __awaiter(void 0, void 0, void 0, function* () {
+    const beepers = yield readFromJsonFile();
+    return beepers;
 });
-export const updateStatus = (userId, updateData, bookId) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield readFromJsonFile();
-    const existingUser = users.find((u) => u.id === userId);
-    if (!existingUser) {
-        throw new Error("User not found.");
+export const getBeeper = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const beepers = yield readFromJsonFile();
+    const beeperFind = beepers.find((beeper) => beeper.id === id);
+    if (!beeperFind) {
+        throw new Error("Invalid beeper ID.");
     }
-    const book = existingUser.books.find((b) => b.id === bookId);
-    if (!book) {
-        throw new Error("Book not found.");
-    }
-    // עדכון נתוני הספר
-    book.title = updateData;
-    yield writeUserToJsonFile(existingUser);
-    return book;
+    return beeperFind;
 });
-export const deleteBeeper = (bookId, userId) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield readFromJsonFile();
-    const existingUser = users.find((u) => u.id === userId);
-    if (!existingUser) {
-        throw new Error("User not found.");
+export const updateStatus = (id, lat, lon) => __awaiter(void 0, void 0, void 0, function* () {
+    const beepers = yield readFromJsonFile();
+    const beeperFind = beepers.find((beeper) => beeper.id === id);
+    if (!beeperFind) {
+        throw new Error("Invalid beeper ID.");
     }
-    // מחיקת הספר מתוך רשימת הספרים
-    existingUser.books = existingUser.books.filter((b) => b.id !== bookId);
-    yield writeUserToJsonFile(existingUser);
+    const statusValues = Object.values(Status);
+    const currentStatusIndex = statusValues.indexOf(beeperFind.status);
+    if (currentStatusIndex === -1 || currentStatusIndex === statusValues.length - 1) {
+        throw new Error("Beeper is already in its final status or has invalid status.");
+    }
+    if (beeperFind.status === Status.deployed) {
+        if (lat && lon) {
+            beeperFind.Latitude = lat;
+            beeperFind.Longitude = lon;
+        }
+        console.log(`Beeper ${id} is deployed, waiting 10 seconds before updating to 'detonated'...`);
+        yield new Promise((resolve) => setTimeout(resolve, 10000));
+        beeperFind.status = Status.detonated;
+        beeperFind.DateExplosion = new Date();
+        console.log(`Beeper ${id} exploded at ${beeperFind.DateExplosion}.`);
+    }
+    else {
+        beeperFind.status = statusValues[currentStatusIndex + 1];
+    }
+    yield writeBeeperToJsonFile(beepers);
+    return `Beeper ${id} status updated to ${beeperFind.status}`;
 });
-export const getStatus = (userId, updateData, bookId) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield readFromJsonFile();
-    const existingUser = users.find((u) => u.id === userId);
-    if (!existingUser) {
-        throw new Error("User not found.");
+export const deleteBeeper = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const beepers = yield readFromJsonFile();
+    const beeperFind = beepers.find((beeper) => beeper.id === id);
+    if (!beeperFind) {
+        throw new Error("Invalid beeper ID.");
     }
-    const book = existingUser.books.find((b) => b.id === bookId);
-    if (!book) {
-        throw new Error("Book not found.");
+    const newBeepersArr = beepers.filter((b) => b.id !== id);
+    yield writeBeeperToJsonFile(newBeepersArr);
+});
+export const getStatus = (status) => __awaiter(void 0, void 0, void 0, function* () {
+    const beepers = yield readFromJsonFile();
+    const newBeepersArr = beepers.filter((b) => b.status === status);
+    if (!newBeepersArr) {
+        throw new Error("Status not found.");
     }
-    // עדכון נתוני הספר
-    book.title = updateData;
-    yield writeUserToJsonFile(existingUser);
-    return book;
+    return newBeepersArr;
 });
